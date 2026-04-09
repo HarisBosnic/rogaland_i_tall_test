@@ -1,0 +1,51 @@
+name: Fetch raw data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 1 * *"   # 1. hver måned kl. 03:00 UTC
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetch-raw-data
+  cancel-in-progress: true
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Install R packages
+        run: |
+          Rscript -e 'install.packages(c(
+            "httr2",
+            "jsonlite",
+            "rjstat",
+            "dplyr",
+            "stringr",
+            "readr"
+          ), repos = "https://cloud.r-project.org")'
+
+      - name: Ensure raw_data exists
+        run: mkdir -p raw_data
+
+      - name: Run fetch script
+        run: Rscript fetch_data/fetch_data.R
+
+      - name: Commit and push updated raw data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add raw_data/
+          git diff --cached --quiet || git commit -m "Update raw_data via GitHub Actions"
+          git push
