@@ -49,5 +49,5 @@ jobs:
           git add raw_data/
           git diff --cached --quiet && exit 0
           git commit -m "Update raw_data via GitHub Actions"
-          git pull --rebase origin main
-          git push origin main
+          git pull --rebase origin "${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"
