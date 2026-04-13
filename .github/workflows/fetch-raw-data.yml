@@ -3,7 +3,7 @@ name: Fetch raw data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 3 1 * *"
+    - cron: "0 1 * * *"
 
 permissions:
   contents: write
